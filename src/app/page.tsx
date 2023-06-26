@@ -1,113 +1,338 @@
-import Image from 'next/image'
+'use client';
+import React, {useEffect, useMemo, useState} from 'react';
+import {supabase} from '@/lib/supabase';
+import Image from 'next/image';
 
-export default function Home() {
+export type OnboardingStep =
+  | 'welcome'
+  | 'name'
+  | 'request'
+  | 'files'
+  | 'thanks';
+export type StepProps = {
+  updateStep: (step: OnboardingStep) => void;
+};
+
+export function Welcome({updateStep}: StepProps) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <div>
+      <h1 className='text-4xl font-bold'>Let’s get things out of the way.</h1>
+      <p className='text-white/50'>
+        You’ll be prompted some questions about what you exactly want and
+        hopefully get your brain flowing!
+      </p>
+
+      <button
+        className='btn btn-primary w-full mt-24'
+        onClick={() => updateStep('name')}
+      >
+        Get Started
+      </button>
+    </div>
+  );
+}
+
+export function ThankYou() {
+  return (
+    <div>
+      <h1 className='text-4xl font-bold'>
+        Thank you, we should have everything we need!
+      </h1>
+      <p className='text-white/50'>
+        Catch you in a few days, we’ll be in touch with you soon. If you have
+        any questions, feel free to reach out to us at!
+      </p>
+
+      <a href='https://dylanreed.dev' className='btn btn-primary w-full mt-24'>
+        Go back home
+      </a>
+    </div>
+  );
+}
+
+export type NameStepProps = {
+  name: string;
+  handleNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+} & StepProps;
+
+export function Name({handleNameChange, name, updateStep}: NameStepProps) {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+
+    // Send the user's name to your database...
+    const {data, error} = await supabase
+      .from('projects')
+      .insert([{name: name}]);
+
+    if (error) {
+      console.error('Error: ', error);
+    } else {
+      console.log('User data: ', data);
+    }
+
+    setLoading(false);
+    updateStep('request');
+  };
+
+  return (
+    <div>
+      <h1 className='text-4xl font-bold'>Who are you?</h1>
+      <p className='text-white/50'>
+        We want to know who you are so we can get in touch with you. And will be
+        stored in our database.
+      </p>
+      <div className='flex flex-col gap-4 mt-4'>
+        <input
+          type='text'
+          placeholder='John Doe'
+          value={name}
+          onChange={handleNameChange}
+          className='input input-bordered w-full border-[0.5px] border-white/25'
+        />
+        <button
+          className='btn btn-primary w-full'
+          onClick={() => handleSubmit()}
+          disabled={loading}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export type RequestStepProps = {
+  request: string;
+  handleRequestChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+} & StepProps;
+
+export function RequestStep({
+  request,
+  handleRequestChange,
+  updateStep,
+}: RequestStepProps) {
+  const handleSubmit = async () => {
+    updateStep('files');
+  };
+  return (
+    <div>
+      <h1 className='text-4xl font-bold'>What is your thinking?</h1>
+      <p className='text-white/50'>
+        We want to know what you want, what you’re thinking, and what you’re not
+        thinking.
+      </p>
+      <div className='form-control mt-12'>
+        <textarea
+          value={request}
+          onChange={handleRequestChange}
+          className='textarea textarea-bordered h-52 border-[0.5px] border-white/25'
+          placeholder='I want a website that does... The vibe I want... I want it to look like...'
+        ></textarea>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+      {request.length > 0 && (
+        <button
+          className='btn btn-primary w-full mt-12'
+          onClick={() => handleSubmit()}
+        >
+          Next
+        </button>
+      )}
+    </div>
+  );
+}
+
+export type FileStepProps = {
+  files: string[];
+  setFiles: any;
+  finalSubmit: () => void;
+} & StepProps;
+
+export function FileStep({
+  files,
+  setFiles,
+  updateStep,
+  finalSubmit,
+}: FileStepProps) {
+  const uploadFile = async (file: File) => {
+    try {
+      const path = `public/${file.name}`;
+      const {data, error} = await supabase.storage
+        .from('project-files')
+        .upload(path, file);
+
+      const url = supabase.storage.from('project-files').getPublicUrl(path)
+        .data.publicUrl;
+
+      setFiles([...files, url]);
+    } catch (error) {
+      console.error('Error: ', error);
+      return;
+    }
+  };
+
+  const handleSubmit = async () => {
+    updateStep('thanks');
+  };
+  return (
+    <div>
+      <h1 className='text-4xl font-bold'>Upload your files.</h1>
+      <p className='text-white/50'>
+        You can upload any files you want to share with us. From branding
+        assets, to reference images. We’ll be able to see them and download
+        them.
+      </p>
+      <div className='form-control w-full mt-12'>
+        <input
+          type='file'
+          onChange={async (e) => {
+            if (!e.target.files) return;
+            await uploadFile(e.target.files[0]);
+          }}
+          className='file-input file-input-bordered w-full max-w-xs'
         />
       </div>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+      <ul className='grid grid-cols-3 gap-4'>
+        {files.map((file, idx) => (
+          <li
+            key={idx}
+            className='flex items-center gap-2 overflow-hidden rounded-xl'
+          >
+            <div className='relative w-52 h-52 flex flex-col justify-end'>
+              <button
+                className='btn btn-ghost btn-xs relative z-20'
+                onClick={() => setFiles(files.filter((f) => f !== file))}
+              >
+                Remove
+              </button>
+              <div className='absolute bg-gradient-to-t from-black to-transparent z-10 inset-0' />
+              <Image
+                src={file}
+                alt='file'
+                fill
+                className='object-cover w-full h-full'
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+      <button
+        className='btn btn-primary w-full mt-12'
+        onClick={() => {
+          handleSubmit();
+          finalSubmit();
+        }}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
+type OnboardingProps = {
+  // children: React.ReactNode;
+};
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+export default function Page({}: OnboardingProps) {
+  const steps = useMemo(() => ['welcome', 'name', 'request', 'files'], []);
+  const [step, setStep] = useState(steps[0]);
+  const [request, setRequest] = useState('');
+  const [files, setFiles] = useState<string[]>([]);
+  const [name, setName] = useState('');
+  const updateStep = (step: string) => {
+    localStorage.setItem('step', step);
+    setStep(step);
+  };
+  const [prompt, setPrompt] = useState<React.JSX.Element>(
+    <Welcome updateStep={updateStep} />
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const finalSubmit = async () => {
+    // Save the data to the database when transitioning to the 'thanks' step
+    const data = {
+      name,
+      request,
+      files,
+    };
+
+    if (!data.name || !data.request || !data.files) return;
+
+    const res = await supabase.from('projects').insert(data);
+
+    console.log(res);
+
+    // Then, update the step
+    updateStep('thanks');
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem('step')) {
+      setStep(localStorage.getItem('step') as string);
+    } else {
+      localStorage.setItem('step', steps[0]);
+      setStep(steps[0]);
+    }
+  }, [steps]);
+
+  useEffect(() => {
+    if (step === 'thanks') {
+      localStorage.removeItem('step');
+    }
+    switch (step) {
+      case 'welcome':
+        setPrompt(<Welcome updateStep={updateStep} />);
+        break;
+      case 'name':
+        setPrompt(
+          <Name
+            name={name}
+            handleNameChange={(e) => setName(e.target.value)}
+            updateStep={updateStep}
+          />
+        );
+        break;
+      case 'request':
+        setPrompt(
+          <RequestStep
+            request={request}
+            handleRequestChange={(e) => setRequest(e.target.value)}
+            updateStep={updateStep}
+          />
+        );
+        break;
+      case 'files':
+        setPrompt(
+          <FileStep
+            files={files}
+            setFiles={setFiles}
+            updateStep={updateStep}
+            finalSubmit={finalSubmit}
+          />
+        );
+        break;
+      case 'thanks':
+        setPrompt(<ThankYou />);
+        break;
+      default:
+        setPrompt(<Welcome updateStep={updateStep} />);
+        break;
+    }
+  }, [step, name, files, request]);
+
+  console.log('data', {
+    name,
+    request,
+    files,
+  });
+
+  return (
+    <main className='min-h-screen flex justify-center items-center max-w-xl mx-auto'>
+      {prompt}
     </main>
-  )
+  );
 }
