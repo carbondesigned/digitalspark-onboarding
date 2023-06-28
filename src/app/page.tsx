@@ -15,11 +15,13 @@ export type StepProps = {
 
 export function Welcome({updateStep}: StepProps) {
   return (
-    <div>
-      <h1 className='text-4xl font-bold'>Let’s get things out of the way.</h1>
+    <div className='flex flex-col gap-4'>
+      <h1 className='text-4xl font-bold'>
+        Thanks for using our service! Let’s get things out of the way.
+      </h1>
       <p className='text-white/50'>
-        You’ll be prompted some questions about what you exactly want and
-        hopefully get your brain flowing!
+        You’ll be prompted some questions about what you exactly want. From your
+        thinking of the project, to the files you want to share with us.
       </p>
 
       <button
