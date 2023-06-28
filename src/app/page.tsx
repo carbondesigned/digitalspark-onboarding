@@ -3,17 +3,12 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {supabase} from '@/lib/supabase';
 import Image from 'next/image';
 
-export type OnboardingStep =
-  | 'welcome'
-  | 'name'
-  | 'request'
-  | 'files'
-  | 'thanks';
-export type StepProps = {
+type OnboardingStep = 'welcome' | 'name' | 'request' | 'files' | 'thanks';
+type StepProps = {
   updateStep: (step: OnboardingStep) => void;
 };
 
-export function Welcome({updateStep}: StepProps) {
+function Welcome({updateStep}: StepProps) {
   return (
     <div className='flex flex-col gap-4'>
       <h1 className='text-4xl font-bold'>
@@ -34,7 +29,7 @@ export function Welcome({updateStep}: StepProps) {
   );
 }
 
-export function ThankYou() {
+function ThankYou() {
   return (
     <div>
       <h1 className='text-4xl font-bold'>
@@ -52,12 +47,12 @@ export function ThankYou() {
   );
 }
 
-export type NameStepProps = {
+type NameStepProps = {
   name: string;
   handleNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 } & StepProps;
 
-export function Name({handleNameChange, name, updateStep}: NameStepProps) {
+function Name({handleNameChange, name, updateStep}: NameStepProps) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -105,12 +100,12 @@ export function Name({handleNameChange, name, updateStep}: NameStepProps) {
   );
 }
 
-export type RequestStepProps = {
+type RequestStepProps = {
   request: string;
   handleRequestChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 } & StepProps;
 
-export function RequestStep({
+function RequestStep({
   request,
   handleRequestChange,
   updateStep,
@@ -146,18 +141,13 @@ export function RequestStep({
   );
 }
 
-export type FileStepProps = {
+type FileStepProps = {
   files: string[];
   setFiles: any;
   finalSubmit: () => void;
 } & StepProps;
 
-export function FileStep({
-  files,
-  setFiles,
-  updateStep,
-  finalSubmit,
-}: FileStepProps) {
+function FileStep({files, setFiles, updateStep, finalSubmit}: FileStepProps) {
   const uploadFile = async (file: File) => {
     try {
       const path = `public/${file.name}`;
